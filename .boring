@@ -31,3 +31,5 @@
 \.cvsignore$
 (^|/)Thumbs\.db$
 \.pyc
+\.SConsErlang.conf
+\.directory
