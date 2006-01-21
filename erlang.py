@@ -18,8 +18,20 @@ def generate(env):
         if env.has_key("OUTPUT"):
             newTarget = env["OUTPUT"] + "/" + os.path.basename(newTarget)
         return ([newTarget], source)
-    
-    erlangBuilder = Builder(action = "$ERLC -o $OUTPUT -I $LIBPATH $SOURCE",
+
+    def erlangGenerator(source, target, env, for_signature):
+        command = ["$ERLC"]
+        if env.has_key("OUTPUT"):
+            command += ["-o", env["OUTPUT"]]
+        if env.has_key("LIBPATH"):
+            if not isinstance(env["LIBPATH"], list):
+                env["LIBPATH"] = [env["LIBPATH"]]
+            for libpath in env["LIBPATH"]:
+                command += ["-I", libpath]
+        return [command + [source]]
+            
+                        
+    erlangBuilder = Builder(generator = erlangGenerator,
                             suffix = ".beam",
                             src_suffix = ".erl",
                             emitter = addBeamTarget,
