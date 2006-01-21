@@ -33,3 +33,4 @@
 \.pyc
 \.SConsErlang.conf
 \.directory
+\.sconsign
