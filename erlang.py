@@ -46,7 +46,7 @@ def generate(env):
         command = "$ERLC"
         if env.has_key("OUTPUT"):
             command += " -o " + env["OUTPUT"]
-        else:
+        elif os.path.dirname(source) != "":
             command += " -o " + os.path.dirname(source)
         if env.has_key("LIBPATH"):
             if not isinstance(env["LIBPATH"], list):
