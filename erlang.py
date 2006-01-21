@@ -8,6 +8,8 @@
 # You should have received a copy of the GNU General Public License along with SConsErlang; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 from SCons.Builder import Builder
+from SCons.Scanner import Scanner
+import string
 import os
 
 def generate(env):
@@ -62,7 +64,43 @@ def generate(env):
                             emitter = addTarget,
                             single_source = True)
     env.Append(BUILDERS = {"Erlang" : erlangBuilder})
-    env.Append(ENV = {"HOME" : os.environ["HOME"]})
+    env.Append(ENV = {"HOME" : os.environ["HOME"]})  # erlc needs $HOME.
+
+    def relModules(node, env, path):
+        """ Return a list of modules needed by a .rel file. """
+
+##         # Simple one to one conversion of erlang to python and some other things to easy the work with the structures.
+##         erlToPy = {"%": "#",
+##                    "{": "(",
+##                    "}": ")",
+##                    ".\n": "",
+##                    " ": ""}
+
+##         # Read the erlang (.rel) file into a list of strings excluding comments and blank lines.
+##         relLines = open(str(node), "r").readlines()
+##         relContent = ""
+##         for line in relLines[:]:
+##             if len(line.strip()) != 0 and line.strip()[0] != "%":
+##                 relContent += line.strip()
+
+##         # Perform the one to one conversions.
+##         for key, value in erlToPy.iteritems():
+##             relContent = relContent.replace(key, value)
+
+## #        previousLetter = relContent[0]
+## #        separators = "()[],"
+## #        for index,letter in enumerate(relContent[1:]):
+## #            if (previousLetter in separators) and (letter in string.ascii_lowercase):
+## #                relContent.insert(index, "\"")
+            
+##         print relContent
+        return []
+        
+    relScanner = Scanner(function = relModules,
+                         name = "RelScanner",
+                         skeys = [".rel"],
+                         recursive = False)
+    env.Append(SCANNERS = relScanner)
 
 def exists(env):
     return env.Detect(["erlc"])

@@ -10,23 +10,27 @@
 import os
 
 # Create an environment.
-env = Environment()
+env = Environment(tools = ["default", "erlang"], toolpath = ["./"])
 
 # Configuration.
 configFile = ".SConsErlang.conf"
 opts = Options(configFile)
-opts.Add(PathOption("PREFIX", "Prefix directory (where SCons is installed)", os.environ.get('PYTHON_ROOT',"/usr/local")))
+opts.Add(PathOption("SCONSPREFIX", "SCons prefix directory (where SCons is installed)", os.environ.get('PYTHON_ROOT',"/usr/local/lib/scons/")))
+opts.Add(PathOption("ERLANGPREFIX", "Erlang prefix directory (where Erlang is installed)", "/usr/local/lib/erlang"))
 opts.Update(env)
 opts.Save(configFile, env)
 
 # Help.
 Help(opts.GenerateHelpText(env))
 
-# Install directories.
-installDir = "$PREFIX/lib/scons/SCons/Tool/"
+# Compile the erlangscanner.
+beams = env.Erlang("erlangscanner.erl")
 
-# chicken.py, no build needed.
-env.Install(installDir, 'erlang.py')
+# Install erlang.py
+env.Install("$SCONSPREFIX/SCons/Tool/", "erlang.py")
+env.Install("$ERLANGPREFIX/lib/sconserlang-0.0.0/ebin/", beams)
+env.Install("$ERLANGPREFIX/lib/sconserlang-0.0.0/ebin/", "sconserlang.app")
 
 # Alias for installing.
-env.Alias("install", installDir)
+env.Alias("install", "$SCONSPREFIX")
+env.Alias("install", "$ERLANGPREFIX")
