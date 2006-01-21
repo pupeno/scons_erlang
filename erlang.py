@@ -13,28 +13,50 @@ import os
 def generate(env):
     env["ERLC"] = env.Detect("erlc") or "erlc"
 
-    def addBeamTarget(target, source, env):
-        newTarget = os.path.splitext(str(source[0]))[0]+".beam"
+    def addTarget(target, source, env):
+        """ Adds the targets (.beam, .script and/or .boot) according to source's extension, source's path and $OUTPUT. """
+
+        # Tear appart the source.
+        filename = os.path.basename(str(source[0]))
+        extension = os.path.splitext(filename)[1]
+        basename = os.path.splitext(filename)[0]
+
+        # Use $OUTPUT or where the source is as the prefix.
         if env.has_key("OUTPUT"):
-            newTarget = env["OUTPUT"] + "/" + os.path.basename(newTarget)
-        return ([newTarget], source)
+            prefix = env["OUTPUT"] + "/"
+        else:
+            prefix = os.path.dirname(str(source[0])) + "/"
+
+        # Generate the targen according to the source.
+        if extension == ".erl":
+            # .erls generate a .beam.
+            return ([prefix + basename + ".beam"], source)
+        elif extension == ".rel":
+            # .rels generate a .script and a .boot.
+            return ([prefix + basename + ".script", prefix + basename + ".boot"], source) 
+        else:
+            return (target, source)
 
     def erlangGenerator(source, target, env, for_signature):
+        """ Generate the erlc compilation command line. """
+        source = str(source[0])
         command = "$ERLC"
         if env.has_key("OUTPUT"):
             command += " -o " + env["OUTPUT"]
+        else:
+            command += " -o " + os.path.dirname(source)
         if env.has_key("LIBPATH"):
             if not isinstance(env["LIBPATH"], list):
                 env["LIBPATH"] = [env["LIBPATH"]]
             for libpath in env["LIBPATH"]:
                 command += " -I " + libpath
-        return command + " " + str(source[0])
+        return command + " " + source
     
     erlangBuilder = Builder(generator = erlangGenerator,
                             #action = "$ERLC -o $OUTPUT $SOURCE",
-                            suffix = ".beam",
+                            #suffix = [".beam", ".boot", ".script"],
                             src_suffix = ".erl",
-                            emitter = addBeamTarget,
+                            emitter = addTarget,
                             single_source = True)
     env.Append(BUILDERS = {"Erlang" : erlangBuilder})
     env.Append(ENV = {"HOME" : os.environ["HOME"]})
