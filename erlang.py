@@ -20,12 +20,15 @@ def generate(env):
         filename = os.path.basename(str(source[0]))
         extension = os.path.splitext(filename)[1]
         basename = os.path.splitext(filename)[0]
-
+        directory = os.path.dirname(str(source[0]))
+        
         # Use $OUTPUT or where the source is as the prefix.
         if env.has_key("OUTPUT"):
             prefix = env["OUTPUT"] + "/"
+        elif directory != "":
+            prefix = directory + "/"
         else:
-            prefix = os.path.dirname(str(source[0])) + "/"
+            prefix = ""
 
         # Generate the targen according to the source.
         if extension == ".erl":
