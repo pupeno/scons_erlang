@@ -11,6 +11,7 @@ from SCons.Builder import Builder
 from SCons.Scanner import Scanner
 import string
 import os
+import subprocess
 
 def generate(env):
     env["ERLC"] = env.Detect("erlc") or "erlc"
@@ -68,6 +69,19 @@ def generate(env):
 
     def relModules(node, env, path):
         """ Return a list of modules needed by a .rel file. """
+        command = "erl -noshell -s erlangscanner relModules \"" + str(node) + "\" -s init stop"
+        print "Abount to run: ", command
+        sp = subprocess.Popen(command,
+                              shell = True,
+                              stdin = None,
+                              stdout = subprocess.PIPE,
+                              stderr = subprocess.PIPE)
+        sp.wait()
+        modules = []
+        for module in sp.stdout.readlines():
+            modules.append(module.strip())
+        print modules
+            
 
 ##         # Simple one to one conversion of erlang to python and some other things to easy the work with the structures.
 ##         erlToPy = {"%": "#",
