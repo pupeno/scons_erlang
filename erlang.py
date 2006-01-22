@@ -88,45 +88,6 @@ def generate(env):
     env.Append(BUILDERS = {"Erlang" : erlangBuilder})
     env.Append(ENV = {"HOME" : os.environ["HOME"]})  # erlc needs $HOME.
 
-    def relModules(node, env, path):
-        """ Return a list of modules needed by a .rel file. """
-
-        # Run the function relModules of erlangscanner to get the modules 
-        command = "erl -noshell -s erlangscanner relApplications \"" + str(node) + "\" -s init stop"
-        sp = subprocess.Popen(command,
-                              shell = True,
-                              stdin = None,
-                              stdout = subprocess.PIPE,
-                              stderr = subprocess.PIPE)
-        sp.wait()
-        if sp.returncode != 0:
-            print "Warning: The scanner failed to scan your files, dependencies won't be calculated."
-            print "If your file '%s' is correctly (syntactically and semantically), this is a bug. %s" % (node, bugReport)
-            print "Return code: %s." % sp.returncode
-            print "Output: \n%s\n" % sp.stdout.read().strip()
-            print "Error: \n%s\n" % sp.stderr.read().strip()
-            return []
-
-        # Get the applications defined in the .rel.
-        apps = sp.stdout.read().split()
-
-        # Build the search path
-        paths = [outputDir(str(node), env)] + libpath(env)
-
-        for path in paths:
-            for app in apps:
-                appFileName = path + app + ".app"
-                if os.access(appFileName, os.R_OK):
-                    print "Scanning " + appFileName
-            
-        return []
-        
-    relScanner = Scanner(function = relModules,
-                         name = "RelScanner",
-                         skeys = [".rel"],
-                         recursive = False)
-    env.Append(SCANNERS = relScanner)
-
     def outputDir(source, env):
         """ Given a source and its environment, return the output directory. """
         if env.has_key("OUTPUT"):
@@ -151,6 +112,79 @@ def generate(env):
             return "./"
         else:
             return directory + "/"
+
+    def relModules(node, env, path):
+        """ Return a list of modules needed by a release (.rel) file. """
+
+        # Run the function reApplications of erlangscanner to get the applications.
+        command = "erl -noshell -s erlangscanner relApplications \"" + str(node) + "\" -s init stop"
+        sp = subprocess.Popen(command,
+                              shell = True,
+                              stdin = None,
+                              stdout = subprocess.PIPE,
+                              stderr = subprocess.PIPE)
+        sp.wait()
+        if sp.returncode != 0:
+            print "Warning: The scanner failed to scan your files, dependencies won't be calculated."
+            print "If your file '%s' is correctly (syntactically and semantically), this is a bug. %s" % (node, bugReport)
+            print "Command: %s." % command
+            print "Return code: %s." % sp.returncode
+            print "Output: \n%s\n" % sp.stdout.read().strip()
+            print "Error: \n%s\n" % sp.stderr.read().strip()
+            return []
+
+        # Get the applications defined in the .rel.
+        appNames = sp.stdout.read().split()
+
+        # Build the search path
+        paths = set([outputDir(str(node), env)] + libpath(env))
+
+        modules = []
+        for path in paths:
+            for appName in appNames:
+                appFileName = path + appName + ".app"
+                if os.access(appFileName, os.R_OK):
+                    modules += appModules(appFileName, env, path)
+        return modules
+
+    def appModules(node, env, path):
+        """ Return a list of modules needed by a application (.app) file. """
+        
+        # Run the function appModules of erlangscanner to get the modules.
+        command = "erl -noshell -s erlangscanner appModules \"" + str(node) + "\" -s init stop"
+        sp = subprocess.Popen(command,
+                              shell = True,
+                              stdin = None,
+                              stdout = subprocess.PIPE,
+                              stderr = subprocess.PIPE)
+        sp.wait()
+        if sp.returncode != 0:
+            print "Warning: The scanner failed to scan your files, dependencies won't be calculated."
+            print "If your file '%s' is correctly (syntactically and semantically), this is a bug. %s" % (node, bugReport)
+            print "Command: %s." % command
+            print "Return code: %s." % sp.returncode
+            print "Output: \n%s\n" % sp.stdout.read().strip()
+            print "Error: \n%s\n" % sp.stderr.read().strip()
+            return []
+
+        # Get the applications defined in the .rel.
+        moduleNames = sp.stdout.read().split()
+
+        # Build the search path
+        paths = set([outputDir(node, env)] + libpath(env))
+
+        modules = []
+        # When there are more than one application in a project, since we are scanning all paths against all files, we might end up with more dependencies that really exists. The worst is that we'll get recompilation of a file that didn't really needed it.
+        for path in paths:
+            for moduleName in moduleNames:
+                modules.append(moduleName + ".beam")
+        return modules
+
+    relScanner = Scanner(function = relModules,
+                         name = "RelScanner",
+                         skeys = [".rel"],
+                         recursive = False)
+    env.Append(SCANNERS = relScanner)
             
 def exists(env):
     return env.Detect(["erlc"])
