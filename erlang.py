@@ -107,11 +107,17 @@ def generate(env):
             print "Error: \n%s\n" % sp.stderr.read().strip()
             return []
 
-        # Get the modules.
-        modules = sp.stdout.read().split()
+        # Get the applications defined in the .rel.
+        apps = sp.stdout.read().split()
 
         # Build the search path
-        searchPaths = [outputDir(str(node), env)] + libpath(env)
+        paths = [outputDir(str(node), env)] + libpath(env)
+
+        for path in paths:
+            for app in apps:
+                appFileName = path + app + ".app"
+                if os.access(appFileName, os.R_OK):
+                    print "Scanning " + appFileName
             
         return []
         
@@ -144,7 +150,7 @@ def generate(env):
         if directory == "":
             return "./"
         else:
-            return directory
+            return directory + "/"
             
 def exists(env):
     return env.Detect(["erlc"])
