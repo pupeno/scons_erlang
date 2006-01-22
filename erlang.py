@@ -16,22 +16,27 @@ import subprocess
 def generate(env):
     env["ERLC"] = env.Detect("erlc") or "erlc"
 
+    bugReport = "Please report it to Pupeno <pupeno@pupeno.com> (http://pupeno.com)."
+
     def addTarget(target, source, env):
         """ Adds the targets (.beam, .script and/or .boot) according to source's extension, source's path and $OUTPUT. """
 
+        # We should receive one and only one source.
+        if len(source) > 1:
+            print "Warning: unexpected internal situation."
+            print "This is a bug. %s" % bugReport
+            print "addTarget received more than one source."
+            print "addTarget(%s, %s, %s)" % (source, target, env)
+
+        sourceStr = str(source[0])
+        
         # Tear appart the source.
-        filename = os.path.basename(str(source[0]))
+        filename = os.path.basename(sourceStr)
         extension = os.path.splitext(filename)[1]
         basename = os.path.splitext(filename)[0]
-        directory = os.path.dirname(str(source[0]))
         
         # Use $OUTPUT or where the source is as the prefix.
-        if env.has_key("OUTPUT"):
-            prefix = env["OUTPUT"] + "/"
-        elif directory != "":
-            prefix = directory + "/"
-        else:
-            prefix = ""
+        prefix = outputDir(sourceStr, env)
 
         # Generate the targen according to the source.
         if extension == ".erl":
@@ -41,21 +46,37 @@ def generate(env):
             # .rels generate a .script and a .boot.
             return ([prefix + basename + ".script", prefix + basename + ".boot"], source) 
         else:
+            print "Warning: extension '%s' is unknown." % extension
+            print "If you feel this is a valid extension, then it might be a missing feature or a bug. %s" % bugReport
+            print "addTarget(%s, %s, %s)." % (target, source, env)
             return (target, source)
 
     def erlangGenerator(source, target, env, for_signature):
         """ Generate the erlc compilation command line. """
+
+        # We should receive one and only one source.
+        if len(source) > 1:
+            print "Warning: unexpected internal situation."
+            print "This is a bug. %s" % bugReport
+            print "erlangGenerator received more than one source."
+            print "erlangGenerator(%s, %s, %s, %s)" % (source, target, env, for_signature)
+            
         source = str(source[0])
+
+        # Start with the complier.
         command = "$ERLC"
-        if env.has_key("OUTPUT"):
-            command += " -o " + env["OUTPUT"]
-        elif os.path.dirname(source) != "":
-            command += " -o " + os.path.dirname(source)
+
+        # The output (-o) parameter
+        command += " -o " + outputDir(source, env)
+        
+        # Add the libpaths.
         if env.has_key("LIBPATH"):
             if not isinstance(env["LIBPATH"], list):
                 env["LIBPATH"] = [env["LIBPATH"]]
             for libpath in env["LIBPATH"]:
                 command += " -I " + libpath
+
+        # At last, the source.
         return command + " " + source
     
     erlangBuilder = Builder(generator = erlangGenerator,
@@ -69,45 +90,29 @@ def generate(env):
 
     def relModules(node, env, path):
         """ Return a list of modules needed by a .rel file. """
-        command = "erl -noshell -s erlangscanner relModules \"" + str(node) + "\" -s init stop"
-        print "Abount to run: ", command
+
+        # Run the function relModules of erlangscanner to get the modules 
+        command = "erl -noshell -s erlangscanner relApplications \"" + str(node) + "\" -s init stop"
         sp = subprocess.Popen(command,
                               shell = True,
                               stdin = None,
                               stdout = subprocess.PIPE,
                               stderr = subprocess.PIPE)
         sp.wait()
-        modules = []
-        for module in sp.stdout.readlines():
-            modules.append(module.strip())
-        print modules
+        if sp.returncode != 0:
+            print "Warning: The scanner failed to scan your files, dependencies won't be calculated."
+            print "If your file '%s' is correctly (syntactically and semantically), this is a bug. %s" % (node, bugReport)
+            print "Return code: %s." % sp.returncode
+            print "Output: \n%s\n" % sp.stdout.read().strip()
+            print "Error: \n%s\n" % sp.stderr.read().strip()
+            return []
+
+        # Get the modules.
+        modules = sp.stdout.read().split()
+
+        # Build the search path
+        searchPaths = [outputDir(str(node), env)] + libpath(env)
             
-
-##         # Simple one to one conversion of erlang to python and some other things to easy the work with the structures.
-##         erlToPy = {"%": "#",
-##                    "{": "(",
-##                    "}": ")",
-##                    ".\n": "",
-##                    " ": ""}
-
-##         # Read the erlang (.rel) file into a list of strings excluding comments and blank lines.
-##         relLines = open(str(node), "r").readlines()
-##         relContent = ""
-##         for line in relLines[:]:
-##             if len(line.strip()) != 0 and line.strip()[0] != "%":
-##                 relContent += line.strip()
-
-##         # Perform the one to one conversions.
-##         for key, value in erlToPy.iteritems():
-##             relContent = relContent.replace(key, value)
-
-## #        previousLetter = relContent[0]
-## #        separators = "()[],"
-## #        for index,letter in enumerate(relContent[1:]):
-## #            if (previousLetter in separators) and (letter in string.ascii_lowercase):
-## #                relContent.insert(index, "\"")
-            
-##         print relContent
         return []
         
     relScanner = Scanner(function = relModules,
@@ -116,5 +121,30 @@ def generate(env):
                          recursive = False)
     env.Append(SCANNERS = relScanner)
 
+    def outputDir(source, env):
+        """ Given a source and its environment, return the output directory. """
+        if env.has_key("OUTPUT"):
+            return env["OUTPUT"]
+        else:
+            return dirOf(source)
+
+    def libpath(env):
+        """ Return a list of the libpath or an empty list. """
+        if env.has_key("LIBPATH"):
+            if isinstance(env["LIBPATH"], list):
+                return env["LIBPATH"]
+            else:
+                return [env["LIBPATH"]]
+        else:
+            return []
+
+    def dirOf(filename):
+        """ Returns the relative directory of filename. """
+        directory = os.path.dirname(filename)
+        if directory == "":
+            return "./"
+        else:
+            return directory
+            
 def exists(env):
     return env.Detect(["erlc"])

@@ -1,19 +1,19 @@
 -module(erlangscanner).
--export([relModules/1]).
+-export([relApplications/1]).
 
-relModules([File]) ->
-    {ok, {_,_,_,Modules}} = file:script(File),
-    printModules(moduleNames(Modules)).
+relApplications([File]) ->
+    {ok, {_,_,_,Applications}} = file:script(File),
+    printList(applicationNames(Applications)).
         
-moduleNames([]) ->
+applicationNames([]) ->
     [];
-moduleNames([{ModuleName,_}|Modules]) ->
-    [ModuleName | moduleNames(Modules)].
+applicationNames([{ApplicationName,_}|Applications]) ->
+    [ApplicationName | applicationNames(Applications)].
     
-printModules([]) ->
+printList([]) ->
     ok;
-printModules([Name|Modules]) ->
+printList([Name|Modules]) ->
     io:fwrite("~w~n", [Name]),
-    printModules(Modules).
+    printList(Modules).
     
     
