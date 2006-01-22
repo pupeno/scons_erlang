@@ -1,8 +1,8 @@
 -module(erlangscanner).
--export([relModules/0]).
+-export([relModules/1]).
 
-relModules() ->
-    {ok, {_,_,_,Modules}, _} = file:path_script(["./"], "fanterlasticfour.rel"),
+relModules([File]) ->
+    {ok, {_,_,_,Modules}} = file:script(File),
     printModules(moduleNames(Modules)).
         
 moduleNames([]) ->
