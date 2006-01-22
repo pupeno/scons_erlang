@@ -34,3 +34,4 @@
 \.SConsErlang.conf
 \.directory
 \.sconsign
+\.beam
