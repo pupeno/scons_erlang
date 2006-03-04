@@ -15,6 +15,7 @@ import subprocess
 
 def generate(env):
     env["ERLC"] = env.Detect("erlc") or "erlc"
+    env["ERL"] = env.Detect("erl") or "erl"
 
     bugReport = "Please report it to Pupeno <pupeno@pupeno.com> (http://pupeno.com)."
 
@@ -185,6 +186,19 @@ def generate(env):
                          skeys = [".rel"],
                          recursive = False)
     env.Append(SCANNERS = relScanner)
+
+    def edocGenerator(source, target, env, for_signature):
+        """ Generate the command line to generate the code. """
+        command = 'echo "edoc:files([%s], [{dir, \\"%s\\"}])." | erl' % (
+            ",".join(['\\"' + str(x) + '\\"' for x in source]),
+            str(target[0]))
             
+        print command
+            
+        return command
+        
+    edocBuilder = Builder(generator = edocGenerator)
+    env.Append(BUILDERS = {"EDoc" : edocBuilder})
+    
 def exists(env):
     return env.Detect(["erlc"])
