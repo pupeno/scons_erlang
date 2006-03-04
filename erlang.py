@@ -189,8 +189,8 @@ def generate(env):
 
     def edocGenerator(source, target, env, for_signature):
         """ Generate the command line to generate the code. """
-        command = 'echo "edoc:files([%s], [{dir, \\"%s\\"}])." | erl' % (
-            ",".join(['\\"' + str(x) + '\\"' for x in source]),
+        command = "erl -noshell -run edoc_run files '[%s]' '[{dir, \"%s\"}]' -run init stop" % (
+            ",".join(['"' + str(x) + '"' for x in source]),
             str(target[0]))
             
         print command
