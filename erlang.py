@@ -189,15 +189,30 @@ def generate(env):
 
     def edocGenerator(source, target, env, for_signature):
         """ Generate the command line to generate the code. """
+        tdir = os.path.dirname(str(target[0])) + "/"
+        
         command = "erl -noshell -run edoc_run files '[%s]' '[{dir, \"%s\"}]' -run init stop" % (
             ",".join(['"' + str(x) + '"' for x in source]),
-            str(target[0]))
+            tdir)
             
         print command
             
         return command
-        
-    edocBuilder = Builder(generator = edocGenerator)
+    
+    def documentTargets(target, source, env):
+        """ Artifitially create all targets that generating documentation will generate to clean them up latter. """
+        tdir = os.path.dirname(str(target[0])) + "/"
+
+        newTargets = [str(target[0])]
+        # TODO: What happens if two different sources has the same name on different directories ?
+        newTargets += [tdir + os.path.splitext(os.path.basename(filename))[0] + ".html"
+                       for filename in map(str, source)]
+
+        newTargets += [tdir + filename for filename in ["edoc-info", "modules-frame.html", "overview-summary.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
+        print newTargets
+        return (newTargets, source)
+    
+    edocBuilder = Builder(generator = edocGenerator, emitter = documentTargets)
     env.Append(BUILDERS = {"EDoc" : edocBuilder})
     
 def exists(env):
