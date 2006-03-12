@@ -194,9 +194,7 @@ def generate(env):
         command = "erl -noshell -run edoc_run files '[%s]' '[{dir, \"%s\"}]' -run init stop" % (
             ",".join(['"' + str(x) + '"' for x in source]),
             tdir)
-            
-        print command
-            
+
         return command
     
     def documentTargets(target, source, env):
@@ -208,8 +206,8 @@ def generate(env):
         newTargets += [tdir + os.path.splitext(os.path.basename(filename))[0] + ".html"
                        for filename in map(str, source)]
 
-        newTargets += [tdir + filename for filename in ["edoc-info", "modules-frame.html", "overview-summary.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
-        print newTargets
+        newTargets += [tdir + filename for filename in
+                       ["edoc-info", "modules-frame.html", "overview-summary.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
         return (newTargets, source)
     
     edocBuilder = Builder(generator = edocGenerator, emitter = documentTargets)
