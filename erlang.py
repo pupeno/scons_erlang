@@ -214,13 +214,11 @@ def generate(env):
 
     def edocScanner(node, env, path):
         #print "edocScanner(%s, %s, %s)\n" % (node, env, path)
-        ##########################################
-        ##########################################
-        ###### TODO: Only return ["overview.edoc"] if it exists!!!!
-        ##########################################
-        ##########################################
-        #tdir = os.path.dirname(str(node))
-        return ["overview.edoc"]
+        overview = os.path.dirname(str(node)) + "/overview.edoc"
+        if os.path.exists(overview):
+            return ["overview.edoc"]
+        else:
+            return []
         
     edocBuilder = Builder(generator = edocGenerator,
                           emitter = documentTargets,
