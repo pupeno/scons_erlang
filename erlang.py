@@ -208,9 +208,23 @@ def generate(env):
 
         newTargets += [tdir + filename for filename in
                        ["edoc-info", "modules-frame.html", "overview-summary.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
+
+        #newSources = source + [tdir + "overview.edoc"]
         return (newTargets, source)
-    
-    edocBuilder = Builder(generator = edocGenerator, emitter = documentTargets)
+
+    def edocScanner(node, env, path):
+        #print "edocScanner(%s, %s, %s)\n" % (node, env, path)
+        ##########################################
+        ##########################################
+        ###### TODO: Only return ["overview.edoc"] if it exists!!!!
+        ##########################################
+        ##########################################
+        #tdir = os.path.dirname(str(node))
+        return ["overview.edoc"]
+        
+    edocBuilder = Builder(generator = edocGenerator,
+                          emitter = documentTargets,
+                          target_scanner = Scanner(function=edocScanner))
     env.Append(BUILDERS = {"EDoc" : edocBuilder})
     
 def exists(env):
