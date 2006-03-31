@@ -1,1 +1,3 @@
 - Is it possible that SCons Erlang goes totally crazy if the .erl, .beam, .app and .rel files are in different directories. There's moderately support for that and full support is planned, but currently it might not work.
+- Documentation.
+
