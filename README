@@ -1,42 +1,78 @@
 SCons Erlang 0.0.0
 ==================
 
-Scons Erlang is an add on for SCons, a mako/autotools replacement to compile Erlang projects.
+Scons Erlang is an add on for SCons, a make/autotools replacement, to compile Erlang projects.
 
-It is currently in it's early development stages but it can already be useful.
+It is currently in it's early development stages but it can already be useful. There's no documentation yet. If you want to use it first learn the basics of SCons at the `SCons User's Guide`_. Then, to learn how to use SCons Erlang itself take a look at these two project's source code (currently unreleased):
 
-There's no documentation yet. If you want to use it first learn the basics of SCons at the SCons User's Guide at http://scons.org/doc/HTML/scons-user/book1.html
+- `Serlvers <http://pupeno.com/software/serlvers>`__
+- `Fanterlastic Four <http://pupeno.com/software/fanterlastic-four>`__
 
-Then, to learn how to use SCons Erlang itself take a look at these two project's source code (unreleased as the time of this release):
+.. _`SCons User's Guide`: http://scons.org/doc/HTML/scons-user/book1.html
 
-- Serlvers: http://software.pupeno.com/Serlvers
-- Fanterlastic Four: http://software.pupeno.com/FanterlasticFour
+Getting
+-------
+
+You can find the lattest version of SCons Erlang on http://pupeno.com/software/scons-erlang
 
 Requirements
 ------------
 
-You'll need:
+Here I list what I use, but other versions, newer and older, may work. I am interested in knowing either case, working or not to try to fix them and/or list them:
 
-- SCons: http://www.scons.org
-- Erlang/OTP: http://www.erlang.org
+- `Python <http://python.org>`__ 2.4.2
+- `SCons <http://scons.org>`__ 0.96.1
+- `Erlang/OTP <http://erlang.org>`__ R10B-10
 
 Installation
 ------------
 
 SCons is used to compile and install this package (the Python part is not compiled, but the Erlang part is).
 
-First check out the variables you need to set by running: scons --help
+First check out the variables you need to set by running::
+
+  scons --help
 
 You'll need to set:
 
 - SCONSPREFIX: SCons prefix directory (where SCons is installed). Where you should see a directory named "SCons".
 - ERLANGPREFIX: Erlang prefix directory (where Erlang is installed). Where you should see something like this: bin erts-5.4.13 Install lib misc releases usr.
 
-For example:
+and at the same time you set them, it'll compile.
 
-$ scons SCONSPREFIX=/usr/lib/scons/ ERLANGPREFIX=/usr/lib/erlang
-...
-$ scons install
-...
+Then run::
+  
+  scons install
 
-For the second case you might need sudo or su to reach root capabilities.
+to install. You might need sudo or su to reach superuser capabilities.
+
+For example::
+
+  $ scons SCONSPREFIX=/usr/lib/scons/ ERLANGPREFIX=/usr/lib/erlang
+  scons: Reading SConscript files ...
+  scons: done reading SConscript files.
+  scons: Building targets ...
+  erlc -o ./ erlangscanner.erl
+  scons: done building targets.
+  $ sudo scons install
+  scons: Reading SConscript files ...
+  scons: done reading SConscript files.
+  scons: Building targets ...
+  Install file: "erlang.py" as "/usr/lib/scons/SCons/Tool/erlang.py"
+  Install file: "erlangscanner.beam" as "/usr/lib/erlang/lib/sconserlang-0.0.0/ebin/erlangscanner.beam"
+  Install file: "sconserlang.app" as "/usr/lib/erlang/lib/sconserlang-0.0.0/ebin/sconserlang.app"
+  scons: done building targets.
+  $
+  
+
+Development
+-----------
+
+You can download the development version that is updated to the minute. This version is unstable, it might not even work. To download it you have to use `Darcs <http://darcs.net>`__ and run::
+
+  darcs get http://software.pupeno.com/SConsErlang
+
+Contact
+-------
+
+To contact the author go to http://pupeno.com/contact
