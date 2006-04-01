@@ -1,4 +1,4 @@
-SCons Erlang 0.0.0
+SCons Erlang 0.1.0
 ==================
 
 Scons Erlang is an add on for SCons, a make/autotools replacement, to compile Erlang projects.
