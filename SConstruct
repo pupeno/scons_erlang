@@ -28,8 +28,8 @@ beams = env.Erlang("erlangscanner.erl")
 
 # Install erlang.py
 env.Install("$SCONSPREFIX/SCons/Tool/", "erlang.py")
-env.Install("$ERLANGPREFIX/lib/sconserlang-0.0.0/ebin/", beams)
-env.Install("$ERLANGPREFIX/lib/sconserlang-0.0.0/ebin/", "sconserlang.app")
+env.Install("$ERLANGPREFIX/lib/sconserlang-0.1.0/ebin/", beams)
+env.Install("$ERLANGPREFIX/lib/sconserlang-0.1.0/ebin/", "sconserlang.app")
 
 # Alias for installing.
 env.Alias("install", "$SCONSPREFIX")
