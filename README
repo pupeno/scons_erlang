@@ -20,7 +20,7 @@ Requirements
 
 Here I list what I use, but other versions, newer and older, may work. I am interested in knowing either case, working or not to try to fix them and/or list them:
 
-- `Python <http://python.org>`__ 2.4.2
+- `Python <http://python.org>`__ 2.4.2: Other 2.y.z versions are very likely to work. I am almost sure 1.y.z doesn't.
 - `SCons <http://scons.org>`__ 0.96.1
 - `Erlang/OTP <http://erlang.org>`__ R10B-10
 
@@ -64,13 +64,14 @@ For example::
   scons: done building targets.
   $
   
-
 Development
 -----------
 
-You can download the development version that is updated to the minute. This version is unstable, it might not even work. To download it you have to use `Darcs <http://darcs.net>`__ and run::
+You can download the `development branch`_ that is updated to the minute. This version is unstable, it might not even work. To download it you have to use `Darcs <http://darcs.net>`__ and run::
 
   darcs get http://software.pupeno.com/SConsErlang
+
+.. _`development branch`: http://software.pupeno.com/cgi-bin/darcs.cgi/SConsErlang/?c=browse
 
 Contact
 -------
