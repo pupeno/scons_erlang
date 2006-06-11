@@ -67,7 +67,13 @@ def generate(env):
         # Start with the complier.
         command = "$ERLC"
 
-        # The output (-o) parameter
+        if env.has_key("PATHPREPEND"):
+            command += " -pa " + env["PATHPREPEND"]
+            
+        if env.has_key("PATHAPEND"):
+            command += " -pz " + env["PATHAPEND"]
+
+        # Where to put the output
         command += " -o " + outputDir(source, env)
         
         # Add the libpaths.
@@ -91,8 +97,8 @@ def generate(env):
 
     def outputDir(source, env):
         """ Given a source and its environment, return the output directory. """
-        if env.has_key("OUTPUT"):
-            return env["OUTPUT"]
+        if env.has_key("OUTPUTDIR"):
+            return env["OUTPUTDIR"]
         else:
             return dirOf(source)
 
