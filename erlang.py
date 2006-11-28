@@ -16,19 +16,19 @@ import subprocess
 def generate(env):
     env["ERLC"] = env.Detect("erlc") or "erlc"
     env["ERL"] = env.Detect("erl") or "erl"
-
+    
     bugReport = "Please report it to Pupeno <pupeno@pupeno.com> (http://pupeno.com)."
-
+    
     def addTarget(target, source, env):
         """ Adds the targets (.beam, .script and/or .boot) according to source's extension, source's path and $OUTPUT. """
-
+        
         # We should receive one and only one source.
         if len(source) > 1:
             print "Warning: unexpected internal situation."
             print "This is a bug. %s" % bugReport
             print "addTarget received more than one source."
             print "addTarget(%s, %s, %s)" % (source, target, env)
-
+        
         sourceStr = str(source[0])
         
         # Tear appart the source.
@@ -38,7 +38,7 @@ def generate(env):
         
         # Use $OUTPUT or where the source is as the prefix.
         prefix = outputDir(sourceStr, env)
-
+        
         # Generate the targen according to the source.
         if extension == ".erl":
             # .erls generate a .beam.
@@ -51,28 +51,28 @@ def generate(env):
             print "If you feel this is a valid extension, then it might be a missing feature or a bug. %s" % bugReport
             print "addTarget(%s, %s, %s)." % (target, source, env)
             return (target, source)
-
+    
     def erlangGenerator(source, target, env, for_signature):
         """ Generate the erlc compilation command line. """
-
+        
         # We should receive one and only one source.
         if len(source) > 1:
             print "Warning: unexpected internal situation."
             print "This is a bug. %s" % bugReport
             print "erlangGenerator received more than one source."
             print "erlangGenerator(%s, %s, %s, %s)" % (source, target, env, for_signature)
-            
+        
         source = str(source[0])
-
+        
         # Start with the complier.
         command = "$ERLC"
-
+        
         if env.has_key("PATHPREPEND"):
             command += " -pa " + env["PATHPREPEND"]
-            
+        
         if env.has_key("PATHAPEND"):
             command += " -pz " + env["PATHAPEND"]
-
+        
         # Where to put the output
         command += " -o " + outputDir(source, env)
         
@@ -82,7 +82,7 @@ def generate(env):
                 env["LIBPATH"] = [env["LIBPATH"]]
             for libpath in env["LIBPATH"]:
                 command += " -I " + libpath
-
+        
         # At last, the source.
         return command + " " + source
     
@@ -94,14 +94,14 @@ def generate(env):
                             single_source = True)
     env.Append(BUILDERS = {"Erlang" : erlangBuilder})
     env.Append(ENV = {"HOME" : os.environ["HOME"]})  # erlc needs $HOME.
-
+    
     def outputDir(source, env):
         """ Given a source and its environment, return the output directory. """
         if env.has_key("OUTPUTDIR"):
             return env["OUTPUTDIR"]
         else:
             return dirOf(source)
-
+    
     def libpath(env):
         """ Return a list of the libpath or an empty list. """
         if env.has_key("LIBPATH"):
@@ -111,7 +111,7 @@ def generate(env):
                 return [env["LIBPATH"]]
         else:
             return []
-
+    
     def dirOf(filename):
         """ Returns the relative directory of filename. """
         directory = os.path.dirname(filename)
@@ -119,7 +119,7 @@ def generate(env):
             return "./"
         else:
             return directory + "/"
-
+    
     def relModules(node, env, path):
         """ Return a list of modules needed by a release (.rel) file. """
 
@@ -139,13 +139,13 @@ def generate(env):
             print "Output: \n%s\n" % sp.stdout.read().strip()
             print "Error: \n%s\n" % sp.stderr.read().strip()
             return []
-
+        
         # Get the applications defined in the .rel.
         appNames = sp.stdout.read().split()
-
+        
         # Build the search path
         paths = set([outputDir(str(node), env)] + libpath(env))
-
+        
         modules = []
         for path in paths:
             for appName in appNames:
@@ -153,7 +153,7 @@ def generate(env):
                 if os.access(appFileName, os.R_OK):
                     modules += appModules(appFileName, env, path)
         return modules
-
+    
     def appModules(node, env, path):
         """ Return a list of modules needed by a application (.app) file. """
         
@@ -173,26 +173,26 @@ def generate(env):
             print "Output: \n%s\n" % sp.stdout.read().strip()
             print "Error: \n%s\n" % sp.stderr.read().strip()
             return []
-
+        
         # Get the applications defined in the .rel.
         moduleNames = sp.stdout.read().split()
-
+        
         # Build the search path
         paths = set([outputDir(node, env)] + libpath(env))
-
+        
         modules = []
         # When there are more than one application in a project, since we are scanning all paths against all files, we might end up with more dependencies that really exists. The worst is that we'll get recompilation of a file that didn't really needed it.
         for path in paths:
             for moduleName in moduleNames:
                 modules.append(moduleName + ".beam")
         return modules
-
+    
     relScanner = Scanner(function = relModules,
                          name = "RelScanner",
                          skeys = [".rel"],
                          recursive = False)
     env.Append(SCANNERS = relScanner)
-
+    
     def edocGenerator(source, target, env, for_signature):
         """ Generate the command line to generate the code. """
         tdir = os.path.dirname(str(target[0])) + "/"
@@ -200,24 +200,24 @@ def generate(env):
         command = "erl -noshell -run edoc_run files '[%s]' '[{dir, \"%s\"}]' -run init stop" % (
             ",".join(['"' + str(x) + '"' for x in source]),
             tdir)
-
+        
         return command
     
     def documentTargets(target, source, env):
         """ Artifitially create all targets that generating documentation will generate to clean them up latter. """
         tdir = os.path.dirname(str(target[0])) + "/"
-
+        
         newTargets = [str(target[0])]
         # TODO: What happens if two different sources has the same name on different directories ?
         newTargets += [tdir + os.path.splitext(os.path.basename(filename))[0] + ".html"
                        for filename in map(str, source)]
-
+        
         newTargets += [tdir + filename for filename in
                        ["edoc-info", "modules-frame.html", "overview-summary.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
-
+        
         #newSources = source + [tdir + "overview.edoc"]
         return (newTargets, source)
-
+    
     def edocScanner(node, env, path):
         #print "edocScanner(%s, %s, %s)\n" % (node, env, path)
         overview = os.path.dirname(str(node)) + "/overview.edoc"
@@ -225,7 +225,7 @@ def generate(env):
             return ["overview.edoc"]
         else:
             return []
-        
+    
     edocBuilder = Builder(generator = edocGenerator,
                           emitter = documentTargets,
                           target_scanner = Scanner(function=edocScanner))
