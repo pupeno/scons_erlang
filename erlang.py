@@ -62,6 +62,7 @@ def generate(env):
             print "erlangGenerator received more than one source."
             print "erlangGenerator(%s, %s, %s, %s)" % (source, target, env, for_signature)
         
+        # Get the source name as a string.
         source = str(source[0])
         
         # Do we have any path to prepend ?
@@ -119,7 +120,6 @@ def generate(env):
         return command + " " + source
     
     erlangBuilder = Builder(generator = erlangGenerator,
-                            #action = "$ERLC -o $OUTPUT $SOURCE",
                             #suffix = [".beam", ".boot", ".script"],
                             src_suffix = ".erl",
                             emitter = addTarget,
