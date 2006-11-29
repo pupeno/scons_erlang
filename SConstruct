@@ -24,7 +24,7 @@ opts.Save(configFile, env)
 Help(opts.GenerateHelpText(env))
 
 # Compile the erlangscanner.
-beams = env.Erlang("erlangscanner.erl")
+beams = env.Erlang("src/erlangscanner.erl", OUTPUTDIR="ebin")
 
 # Install erlang.py
 env.Install("$SCONSPREFIX/SCons/Tool/", "erlang.py")
