@@ -64,8 +64,7 @@ def generate(env):
         
         source = str(source[0])
         
-        # Find out what to do.
-
+        # Do we have any path to prepend ?
         if env.has_key("PATHPREPEND"):
             if isinstance(env["PATHPREPEND"], str):
                 path_prepend = [env["PATHPREPEND"]]
@@ -74,13 +73,14 @@ def generate(env):
         else:
             path_prepend = []
 
-        if env.has_key("PATHAPEND"):
-            if isinstance(env["PATHAPEND"], str):
-                path_apend = [env["PATHAPEND"]]
+        # Do we have any path to append ?
+        if env.has_key("PATHAPPEND"):
+            if isinstance(env["PATHAPPEND"], str):
+                path_append = [env["PATHAPPEND"]]
             else:
-                path_apend = env["PATHAPEND"]
+                path_append = env["PATHAPPEND"]
         else:
-            path_apend = []
+            path_append = []
         
         if env.has_key("OUTPUT"):
             if env["OUTPUT"]:
@@ -93,27 +93,20 @@ def generate(env):
         # Start with the complier.
         command = "$ERLC $ERLFLAGS"
 
-        if output:
-            command += " -o " + output
-            path_prepend.append(output)
+        # Add the output statment if it's being used.
+        if output_dir:
+            command += " -o " + output_dir
+            path_prepend.append(output_dir)
         
         # Path preppend.
         if path_prepend:
             arg = " -pa "
             command += arg + arg.join(path_prepend) + " "
         
-        # Path apend.
-        if path_apend:
+        # Path append.
+        if path_append:
             arg = " -pz "
-            command += arg + arg.join(path_apend) + " "
-        
-        # Prepended lib paths.
-        #if env.has_key("PATHPREPEND"):
-        #    command += " -pa " + env["PATHPREPEND"]
-        
-        # Appended lib paths.
-        #if env.has_key("PATHAPEND"):
-        #    command += " -pz " + env["PATHAPEND"]
+            command += arg + arg.join(path_append) + " "
         
         # Add the libpaths.
         if env.has_key("LIBPATH"):
