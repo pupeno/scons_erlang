@@ -36,20 +36,24 @@ def generate(env):
         extension = os.path.splitext(filename)[1]
         basename = os.path.splitext(filename)[0]
         
-        # Use $OUTPUT or where the source is as the prefix.
-        prefix = outputDir(sourceStr, env)
+        # Get the directory where the output is going to end.
+        output_dir = outputDir(sourceStr, env)
         
-        # Generate the targen according to the source.
-        if extension == ".erl":
-            # .erls generate a .beam.
-            return ([prefix + basename + ".beam"], source)
-        elif extension == ".rel":
-            # .rels generate a .script and a .boot.
-            return ([prefix + basename + ".script", prefix + basename + ".boot"], source) 
+        # If the output_dir is False the user doesn't want us to do automatic handling of the output.
+        if output_dir:
+            # Generate the targen according to the source.
+            if extension == ".erl":
+                # .erls generate a .beam.
+                return ([output_dir + basename + ".beam"], source)
+            elif extension == ".rel":
+                # .rels generate a .script and a .boot.
+                return ([output_dir + basename + ".script", output_dir + basename + ".boot"], source) 
+            else:
+                print "Warning: extension '%s' is unknown." % extension
+                print "If you feel this is a valid extension, then it might be a missing feature or a bug. %s" % bugReport
+                print "addTarget(%s, %s, %s)." % (target, source, env)
+                return (target, source)
         else:
-            print "Warning: extension '%s' is unknown." % extension
-            print "If you feel this is a valid extension, then it might be a missing feature or a bug. %s" % bugReport
-            print "addTarget(%s, %s, %s)." % (target, source, env)
             return (target, source)
     
     def erlangGenerator(source, target, env, for_signature):
@@ -83,13 +87,8 @@ def generate(env):
         else:
             path_append = []
         
-        if env.has_key("OUTPUT"):
-            if env["OUTPUT"]:
-                output = env["OUTPUT"]
-            else:
-                output = False
-        else:
-            output = outputDir(source, env)
+        # Get the output directory to be used or False if no automatic output handling is going to be used.
+        output_dir = outputDir(source, env)
         
         # Start with the complier.
         command = "$ERLC $ERLFLAGS"
@@ -130,7 +129,10 @@ def generate(env):
     def outputDir(source, env):
         """ Given a source and its environment, return the output directory. """
         if env.has_key("OUTPUTDIR"):
-            return env["OUTPUTDIR"]
+            if env["OUTPUTDIR"]:
+                return env["OUTPUTDIR"]
+            else:
+                False
         else:
             return dirOf(source)
     
@@ -176,7 +178,11 @@ def generate(env):
         appNames = sp.stdout.read().split()
         
         # Build the search path
-        paths = set([outputDir(str(node), env)] + libpath(env))
+        output_dir = outputDir(str(node), env)
+        if output_dir:
+            paths = set([output_dir] + libpath(env))
+        else:
+            paths = set(libpath(env))
         
         modules = []
         for path in paths:
@@ -210,7 +216,11 @@ def generate(env):
         moduleNames = sp.stdout.read().split()
         
         # Build the search path
-        paths = set([outputDir(node, env)] + libpath(env))
+        output_dir = outputDir(node, env)
+        if output_dir:
+            paths = set([output_dir] + libpath(env))
+        else:
+            paths = set(libpath(env))
         
         modules = []
         # When there are more than one application in a project, since we are scanning all paths against all files, we might end up with more dependencies that really exists. The worst is that we'll get recompilation of a file that didn't really needed it.
