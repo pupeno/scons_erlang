@@ -255,7 +255,7 @@ def generate(env):
                        for filename in map(str, source)]
         
         newTargets += [tdir + filename for filename in
-                       ["edoc-info", "modules-frame.html", "overview-summary.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
+                       ["edoc-info", "modules-frame.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
         
         #newSources = source + [tdir + "overview.edoc"]
         return (newTargets, source)
