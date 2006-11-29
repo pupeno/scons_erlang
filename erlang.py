@@ -64,17 +64,56 @@ def generate(env):
         
         source = str(source[0])
         
-        # Start with the complier.
-        command = "$ERLC"
-        
+        # Find out what to do.
+
         if env.has_key("PATHPREPEND"):
-            command += " -pa " + env["PATHPREPEND"]
-        
+            if isinstance(env["PATHPREPEND"], str):
+                path_prepend = [env["PATHPREPEND"]]
+            else:
+                path_prepend = env["PATH_PREPEND"]
+        else:
+            path_prepend = []
+
         if env.has_key("PATHAPEND"):
-            command += " -pz " + env["PATHAPEND"]
+            if isinstance(env["PATHAPEND"], str):
+                path_apend = [env["PATHAPEND"]]
+            else:
+                path_apend = env["PATHAPEND"]
+        else:
+            path_apend = []
         
-        # Where to put the output
-        command += " -o " + outputDir(source, env)
+        if env.has_key("OUTPUT"):
+            if env["OUTPUT"]:
+                output = env["OUTPUT"]
+            else:
+                output = False
+        else:
+            output = outputDir(source, env)
+        
+        # Start with the complier.
+        command = "$ERLC $ERLFLAGS"
+
+        if output:
+            command += " -o " + output
+            path_prepend.append(output)
+        
+        # Path preppend.
+        if path_prepend:
+            arg = " -pa "
+            command += arg + arg.join(path_prepend) + " "
+        
+        # Path apend.
+        if path_apend:
+            arg = " -pz "
+            command += arg + arg.join(path_apend) + " "
+        
+        # Prepended lib paths.
+        #if env.has_key("PATHPREPEND"):
+        #    command += " -pa " + env["PATHPREPEND"]
+        
+        # Appended lib paths.
+        #if env.has_key("PATHAPEND"):
+        #    command += " -pz " + env["PATHAPEND"]
         
         # Add the libpaths.
         if env.has_key("LIBPATH"):
