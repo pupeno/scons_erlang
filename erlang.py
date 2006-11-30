@@ -162,7 +162,7 @@ def generate(env):
         """ Return a list of applications (.app files) needed by a release (.rel file). """
         
         # Run the function relApplications of erlangscanner to get the applications.
-        command = "erl -noshell -s erlangscanner relApplications \"%s\" -s init stop" % rel
+        command = "erl -noshell -s erlangscanner appNeededByRel \"%s\" -s init stop" % rel
         sp = subprocess.Popen(command,
                               shell = True,
                               stdin = None,
@@ -194,7 +194,7 @@ def generate(env):
         """ Return a list of modules (.beam files) needed by a application (.app file). """
         
         # Run the function appModules of erlangscanner to get the modules.
-        command = "erl -noshell -s erlangscanner appModules \"%s\" -s init stop" % app
+        command = "erl -noshell -s erlangscanner modNeededByApp \"%s\" -s init stop" % app
         sp = subprocess.Popen(command,
                               shell = True,
                               stdin = None,
