@@ -135,11 +135,34 @@ def generate(env):
     ###############################################################
     ##### Erlang Release file scanner methods and definitions #####
     
-    def relModules(node, env, path):
-        """ Return a list of modules needed by a release (.rel) file. """
+    def erlangRelScanner(node, env, path):
+        """ Erlang Release file scanner. Returns the list of modules needed by a .rel file to be compiled into the .script and .boot files. """
 
+        # Get the name of the release file as a string.
+        rel = str(node)
+
+        # Build the search path for applications and modules.
+        output_dir = outputDir(rel, env)
+        if output_dir:
+            paths = set([output_dir] + libpath(env))
+        else:
+            paths = set(libpath(env))
+
+        # Find the applications needed by the release.
+        apps = appNeededByRel(rel, paths)
+        
+        modules = []
+        # Find the modules needed by each application.
+        for app in apps:
+            mods = modNeededByApp(app, paths)
+            modules += mods
+        return modules
+    
+    def appNeededByRel(rel, paths):
+        """ Return a list of applications (.app files) needed by a release (.rel file). """
+        
         # Run the function relApplications of erlangscanner to get the applications.
-        command = "erl -noshell -s erlangscanner relApplications \"" + str(node) + "\" -s init stop"
+        command = "erl -noshell -s erlangscanner relApplications \"%s\" -s init stop" % rel
         sp = subprocess.Popen(command,
                               shell = True,
                               stdin = None,
@@ -158,26 +181,20 @@ def generate(env):
         # Get the applications defined in the .rel.
         appNames = sp.stdout.read().split()
         
-        # Build the search path
-        output_dir = outputDir(str(node), env)
-        if output_dir:
-            paths = set([output_dir] + libpath(env))
-        else:
-            paths = set(libpath(env))
-        
         modules = []
         for path in paths:
             for appName in appNames:
                 appFileName = path + appName + ".app"
                 if os.access(appFileName, os.R_OK):
-                    modules += appModules(appFileName, env, path)
+                    modules.append(appFileName)
+                    #modules += appModules(appFileName, env, path)
         return modules
     
-    def appModules(node, env, path):
-        """ Return a list of modules needed by a application (.app) file. """
+    def modNeededByApp(app, paths):
+        """ Return a list of modules (.beam files) needed by a application (.app file). """
         
         # Run the function appModules of erlangscanner to get the modules.
-        command = "erl -noshell -s erlangscanner appModules \"" + str(node) + "\" -s init stop"
+        command = "erl -noshell -s erlangscanner appModules \"%s\" -s init stop" % app
         sp = subprocess.Popen(command,
                               shell = True,
                               stdin = None,
@@ -196,13 +213,6 @@ def generate(env):
         # Get the applications defined in the .rel.
         moduleNames = sp.stdout.read().split()
         
-        # Build the search path
-        output_dir = outputDir(node, env)
-        if output_dir:
-            paths = set([output_dir] + libpath(env))
-        else:
-            paths = set(libpath(env))
-        
         modules = []
         # When there are more than one application in a project, since we are scanning all paths against all files, we might end up with more dependencies that really exists. The worst is that we'll get recompilation of a file that didn't really needed it.
         for path in paths:
@@ -210,7 +220,7 @@ def generate(env):
                 modules.append(os.path.abspath(path + moduleName +".beam"))
         return modules
     
-    erlangRelScanner = Scanner(function = relModules,
+    erlangRelScanner = Scanner(function = erlangRelScanner,
                                name = "ErlangRelScanner",
                                skeys = [".rel"],
                                recursive = False)
@@ -245,7 +255,6 @@ def generate(env):
         return (newTargets, source)
     
     def edocScanner(node, env, path):
-        #print "edocScanner(%s, %s, %s)\n" % (node, env, path)
         overview = os.path.dirname(str(node)) + "/overview.edoc"
         if os.path.exists(overview):
             return ["overview.edoc"]
