@@ -236,7 +236,7 @@ def generate(env):
         # When there are more than one application in a project, since we are scanning all paths against all files, we might end up with more dependencies that really exists. The worst is that we'll get recompilation of a file that didn't really needed it.
         for path in paths:
             for moduleName in moduleNames:
-                modules.append(moduleName + ".beam")
+                modules.append(os.path.abspath(path + moduleName +".beam"))
         return modules
     
     relScanner = Scanner(function = relModules,
