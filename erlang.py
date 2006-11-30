@@ -167,7 +167,7 @@ def generate(env):
     def relModules(node, env, path):
         """ Return a list of modules needed by a release (.rel) file. """
 
-        # Run the function reApplications of erlangscanner to get the applications.
+        # Run the function relApplications of erlangscanner to get the applications.
         command = "erl -noshell -s erlangscanner relApplications \"" + str(node) + "\" -s init stop"
         sp = subprocess.Popen(command,
                               shell = True,
