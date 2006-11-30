@@ -240,7 +240,7 @@ def generate(env):
         return modules
     
     relScanner = Scanner(function = relModules,
-                         name = "RelScanner",
+                         name = "ErlangRelScanner",
                          skeys = [".rel"],
                          recursive = False)
     env.Append(SCANNERS = relScanner)
