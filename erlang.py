@@ -19,8 +19,13 @@ def generate(env):
     
     bugReport = "Please report it to Pupeno <pupeno@pupeno.com> (http://pupeno.com)."
     
+    ##################################################
+    ##### Erlang Builder methods and definitions #####
+
     def addTarget(target, source, env):
-        """ Adds the targets (.beam, .script and/or .boot) according to source's extension, source's path and $OUTPUT. """
+        """ When the source is a .erl file the target is a .beam file of the same base name and on the output directory according to the user preferences. When the source is a .rel file the targets are a .script and a .boot files with the same rules as for .erl files. For everything else just compalain.
+            If the user chooses to set the output to false disabling automating handling of the output, this function will be useless.
+            The goal of this function is to be used as emitter on the Erlang builder, it make SCons aware of what files to clean when cleaning. """
         
         # We should receive one and only one source.
         if len(source) > 1:
@@ -57,7 +62,8 @@ def generate(env):
             return (target, source)
     
     def erlangGenerator(source, target, env, for_signature):
-        """ Generate the erlc compilation command line. """
+        """ Generate the erlc compilation command line.
+            The purpose of this function is to be used in the Erlang builder. """
         
         # We should receive one and only one source.
         if len(source) > 1:
@@ -125,44 +131,9 @@ def generate(env):
                             single_source = True)
     env.Append(BUILDERS = {"Erlang" : erlangBuilder})
     env.Append(ENV = {"HOME" : os.environ["HOME"]})  # erlc needs $HOME.
-    
-    def outputDir(source, env):
-        """ Given a source and its environment, return the output directory.
-            The OUTPUTDIR environment variable will be checked first, if it is set to False this function returns False (the user wants us out of the way), otherwise the directory of the OUTPUTDIR will be used.
-            If the variable is not set the output directory will be calculate from the source of the file, which is just the directory where the source is unless it ends in src/ in which case the ebin/ counterpart would be used. """
 
-        if env.has_key("OUTPUTDIR"):
-            if env["OUTPUTDIR"]:
-                if env["OUTPUTDIR"][-1] != "/":
-                    return env["OUTPUTDIR"] + "/"
-                else:
-                    return env["OUTPUTDIR"]
-            else:
-                False
-        else:
-            output = dirOf(source)
-            if output[-4:] == "src/":
-                return output[:-4] + "ebin/"
-            else:
-                return output
-    
-    def libpath(env):
-        """ Return a list of the libpath or an empty list. """
-        if env.has_key("LIBPATH"):
-            if isinstance(env["LIBPATH"], list):
-                return env["LIBPATH"]
-            else:
-                return [env["LIBPATH"]]
-        else:
-            return []
-    
-    def dirOf(filename):
-        """ Returns the relative directory of filename. """
-        directory = os.path.dirname(filename)
-        if directory == "":
-            return "./"
-        else:
-            return directory + "/"
+    ###############################################################
+    ##### Erlang Release file scanner methods and definitions #####
     
     def relModules(node, env, path):
         """ Return a list of modules needed by a release (.rel) file. """
@@ -239,11 +210,14 @@ def generate(env):
                 modules.append(os.path.abspath(path + moduleName +".beam"))
         return modules
     
-    relScanner = Scanner(function = relModules,
-                         name = "ErlangRelScanner",
-                         skeys = [".rel"],
-                         recursive = False)
-    env.Append(SCANNERS = relScanner)
+    erlangRelScanner = Scanner(function = relModules,
+                               name = "ErlangRelScanner",
+                               skeys = [".rel"],
+                               recursive = False)
+    env.Append(SCANNERS = erlangRelScanner)
+
+    #######################################################
+    ##### Erlang EDoc builder methods and definitions #####
     
     def edocGenerator(source, target, env, for_signature):
         """ Generate the command line to generate the code. """
@@ -282,6 +256,47 @@ def generate(env):
                           emitter = documentTargets,
                           target_scanner = Scanner(function=edocScanner))
     env.Append(BUILDERS = {"EDoc" : edocBuilder})
+
+    ##########################
+    ##### Helper Methods #####
+    
+    def outputDir(source, env):
+        """ Given a source and its environment, return the output directory.
+            The OUTPUTDIR environment variable will be checked first, if it is set to False this function returns False (the user wants us out of the way), otherwise the directory of the OUTPUTDIR will be used.
+            If the variable is not set the output directory will be calculate from the source of the file, which is just the directory where the source is unless it ends in src/ in which case the ebin/ counterpart would be used. """
+
+        if env.has_key("OUTPUTDIR"):
+            if env["OUTPUTDIR"]:
+                if env["OUTPUTDIR"][-1] != "/":
+                    return env["OUTPUTDIR"] + "/"
+                else:
+                    return env["OUTPUTDIR"]
+            else:
+                False
+        else:
+            output = dirOf(source)
+            if output[-4:] == "src/":
+                return output[:-4] + "ebin/"
+            else:
+                return output
+    
+    def libpath(env):
+        """ Return a list of the libpath or an empty list. """
+        if env.has_key("LIBPATH"):
+            if isinstance(env["LIBPATH"], list):
+                return env["LIBPATH"]
+            else:
+                return [env["LIBPATH"]]
+        else:
+            return []
+    
+    def dirOf(filename):
+        """ Returns the relative directory of filename. """
+        directory = os.path.dirname(filename)
+        if directory == "":
+            return "./"
+        else:
+            return directory + "/"
     
 def exists(env):
     return env.Detect(["erlc"])
