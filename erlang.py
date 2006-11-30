@@ -29,10 +29,10 @@ def generate(env):
         
         # We should receive one and only one source.
         if len(source) > 1:
-            print "Warning: unexpected internal situation."
-            print "This is a bug. %s" % bugReport
-            print "addTarget received more than one source."
-            print "addTarget(%s, %s, %s)" % (source, target, env)
+            print("Warning: unexpected internal situation.")
+            print("This is a bug. %s" % bugReport)
+            print("addTarget received more than one source.")
+            print("addTarget(%s, %s, %s)" % (source, target, env))
         
         sourceStr = str(source[0])
         
@@ -54,9 +54,9 @@ def generate(env):
                 # .rels generate a .script and a .boot.
                 return ([output_dir + basename + ".script", output_dir + basename + ".boot"], source) 
             else:
-                print "Warning: extension '%s' is unknown." % extension
-                print "If you feel this is a valid extension, then it might be a missing feature or a bug. %s" % bugReport
-                print "addTarget(%s, %s, %s)." % (target, source, env)
+                print("Warning: extension '%s' is unknown." % extension)
+                print("If you feel this is a valid extension, then it might be a missing feature or a bug. %s" % bugReport)
+                print("addTarget(%s, %s, %s)." % (target, source, env))
                 return (target, source)
         else:
             return (target, source)
@@ -67,10 +67,10 @@ def generate(env):
         
         # We should receive one and only one source.
         if len(source) > 1:
-            print "Warning: unexpected internal situation."
-            print "This is a bug. %s" % bugReport
-            print "erlangGenerator received more than one source."
-            print "erlangGenerator(%s, %s, %s, %s)" % (source, target, env, for_signature)
+            print("Warning: unexpected internal situation.")
+            print("This is a bug. %s" % bugReport)
+            print("erlangGenerator received more than one source.")
+            print("erlangGenerator(%s, %s, %s, %s)" % (source, target, env, for_signature))
         
         # Get the source name as a string.
         source = str(source[0])
@@ -147,12 +147,12 @@ def generate(env):
                               stderr = subprocess.PIPE)
         sp.wait()
         if sp.returncode != 0:
-            print "Warning: The scanner failed to scan your files, dependencies won't be calculated."
-            print "If your file '%s' is correctly (syntactically and semantically), this is a bug. %s" % (node, bugReport)
-            print "Command: %s." % command
-            print "Return code: %s." % sp.returncode
-            print "Output: \n%s\n" % sp.stdout.read().strip()
-            print "Error: \n%s\n" % sp.stderr.read().strip()
+            print("Warning: The scanner failed to scan your files, dependencies won't be calculated.")
+            print("If your file '%s' is correctly (syntactically and semantically), this is a bug. %s" % (rel, bugReport))
+            print("Command: %s." % command)
+            print("Return code: %s." % sp.returncode)
+            print("Output: \n%s\n" % sp.stdout.read().strip())
+            print("Error: \n%s\n" % sp.stderr.read().strip())
             return []
         
         # Get the applications defined in the .rel.
@@ -185,12 +185,12 @@ def generate(env):
                               stderr = subprocess.PIPE)
         sp.wait()
         if sp.returncode != 0:
-            print "Warning: The scanner failed to scan your files, dependencies won't be calculated."
-            print "If your file '%s' is correctly (syntactically and semantically), this is a bug. %s" % (node, bugReport)
-            print "Command: %s." % command
-            print "Return code: %s." % sp.returncode
-            print "Output: \n%s\n" % sp.stdout.read().strip()
-            print "Error: \n%s\n" % sp.stderr.read().strip()
+            print("Warning: The scanner failed to scan your files, dependencies won't be calculated.")
+            print("If your file '%s' is correctly (syntactically and semantically), this is a bug. %s" % (app, bugReport))
+            print("Command: %s." % command)
+            print("Return code: %s." % sp.returncode)
+            print("Output: \n%s\n" % sp.stdout.read().strip())
+            print("Error: \n%s\n" % sp.stderr.read().strip())
             return []
         
         # Get the applications defined in the .rel.
