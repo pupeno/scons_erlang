@@ -127,14 +127,24 @@ def generate(env):
     env.Append(ENV = {"HOME" : os.environ["HOME"]})  # erlc needs $HOME.
     
     def outputDir(source, env):
-        """ Given a source and its environment, return the output directory. """
+        """ Given a source and its environment, return the output directory.
+            The OUTPUTDIR environment variable will be checked first, if it is set to False this function returns False (the user wants us out of the way), otherwise the directory of the OUTPUTDIR will be used.
+            If the variable is not set the output directory will be calculate from the source of the file, which is just the directory where the source is unless it ends in src/ in which case the ebin/ counterpart would be used. """
+
         if env.has_key("OUTPUTDIR"):
             if env["OUTPUTDIR"]:
-                return env["OUTPUTDIR"]
+                if env["OUTPUTDIR"][-1] != "/":
+                    return env["OUTPUTDIR"] + "/"
+                else:
+                    return env["OUTPUTDIR"]
             else:
                 False
         else:
-            return dirOf(source)
+            output = dirOf(source)
+            if output[-4:] == "src/":
+                return output[:-4] + "ebin/"
+            else:
+                return output
     
     def libpath(env):
         """ Return a list of the libpath or an empty list. """
