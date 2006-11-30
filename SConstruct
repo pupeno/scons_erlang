@@ -8,20 +8,21 @@
 # You should have received a copy of the GNU General Public License along with SConsErlang; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 import os
+# Configuration.
+options = Options("options.cache")
+options.AddOptions(
+    PathOption("SCONSPREFIX", "SCons prefix directory (where SCons is installed)", os.environ.get('PYTHON_ROOT',"/usr/local/lib/scons/")),
+    PathOption("ERLANGPREFIX", "Erlang prefix directory (where Erlang is installed)", "/usr/local/lib/erlang"))
 
 # Create an environment.
-env = Environment(tools = ["default", "erlang"], toolpath = ["./"])
+env = Environment(tools = ["default", "erlang"], toolpath = ["./"], options=options)
 
-# Configuration.
-configFile = ".SConsErlang.conf"
-opts = Options(configFile)
-opts.Add(PathOption("SCONSPREFIX", "SCons prefix directory (where SCons is installed)", os.environ.get('PYTHON_ROOT',"/usr/local/lib/scons/")))
-opts.Add(PathOption("ERLANGPREFIX", "Erlang prefix directory (where Erlang is installed)", "/usr/local/lib/erlang"))
-opts.Update(env)
-opts.Save(configFile, env)
+# Save the options.
+options.Save(options.files[0], env)
+
 
 # Help.
-Help(opts.GenerateHelpText(env))
+Help(options.GenerateHelpText(env))
 
 # Compile the erlangscanner.
 beams = env.Erlang("src/erlangscanner.erl")
