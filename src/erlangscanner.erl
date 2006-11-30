@@ -12,38 +12,36 @@
 %% @copyright 2006 José Pablo Ezequiel "Pupeno" Fernández Silva
 
 -module(erlangscanner).
--export([appNeededByRel/1, modNeededByApp/1]).
+-export([app_needed_by_rel/1, mod_needed_by_app/1]).
 
-appNeededByRel([File]) ->
+app_needed_by_rel([File]) ->
     {ok, {_,_,_,Applications}} = file:script(File),
-    printList(applicationNames(Applications)).
+    print_list(application_names(Applications)).
 
-        
-applicationNames([]) ->
+
+application_names([]) ->
     [];
-applicationNames([{ApplicationName,_}|Applications]) ->
-    [ApplicationName | applicationNames(Applications)].
+application_names([{ApplicationName,_}|Applications]) ->
+    [ApplicationName | application_names(Applications)].
 
 
 
-modNeededByApp([File]) ->
+mod_needed_by_app([File]) ->
     {ok, {_, _, MetaData}} = file:script(File),
-    printList(moduleNames(MetaData)).
+    print_list(module_names(MetaData)).
 
 
-moduleNames([]) ->
+module_names([]) ->
     [];
-moduleNames([{modules, ModuleNames}|_]) ->
+module_names([{modules, ModuleNames}|_]) ->
     ModuleNames;
-moduleNames([_|MetaData]) ->
-    moduleNames(MetaData).
+module_names([_|MetaData]) ->
+    module_names(MetaData).
 
 
     
-printList([]) ->
+print_list([]) ->
     ok;
-printList([Name|Modules]) ->
+print_list([Name|Modules]) ->
     io:fwrite("~w~n", [Name]),
-    printList(Modules).
-    
-    
+    print_list(Modules).
