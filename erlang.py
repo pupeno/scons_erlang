@@ -184,6 +184,7 @@ def generate(env):
         
         # Run the function relApplications of erlangscanner to get the applications.
         command = "erl -noshell -s erlangscanner app_needed_by_rel \"%s\" -s init stop" % rel
+        
         sp = subprocess.Popen(command,
                               shell = True,
                               stdin = None,
@@ -216,6 +217,7 @@ def generate(env):
         
         # Run the function appModules of erlangscanner to get the modules.
         command = "erl -noshell -s erlangscanner mod_needed_by_app \"%s\" -s init stop" % app
+        
         sp = subprocess.Popen(command,
                               shell = True,
                               stdin = None,
@@ -252,11 +254,22 @@ def generate(env):
     
     def edocGenerator(source, target, env, for_signature):
         """ Generate the command line to generate the code. """
-        tdir = os.path.dirname(str(target[0])) + "/"
         
-        command = "erl -noshell -run edoc_run files '[%s]' '[{dir, \"%s\"}]' -run init stop" % (
-            ",".join(['"' + str(x) + '"' for x in source]),
-            tdir)
+        options = []
+
+        if env.has_key("DIR"):
+            options.append(("dir", strInStr(env["DIR"])))
+        else:
+            # Automatic generation of dir based on the target.
+            options.append(("dir", strInStr(os.path.dirname(str(target[0])) + "/")))
+
+        if env.has_key("DEF"):
+            defs =  map(lambda (key, value): pyTupleToErlTulpe((key, strInStr(value))), env["DEF"])
+            options.append(("def", "[" + ",".join(defs) + "]"))
+        
+        options = "[" + ",".join(map(pyTupleToErlTulpe, options)) + "]"
+
+        command = "erl -noshell -run edoc_run files '[%s]' '%s'" % (",".join(['"' + str(x) + '"' for x in source]), options)
         
         return command
     
@@ -327,6 +340,14 @@ def generate(env):
             return "./"
         else:
             return directory + "/"
+
+    def strInStr(str):
+        """ Put a string inside a string, that is, the string will contain leading and trailing double quotes so it is a string containing an Erlang string (otherwise it would be a string containing possible an atom, variable name or something just invalid). """
+        return '"%s"' % str
+
+    def pyTupleToErlTulpe(tpl):
+        """ Turn a Python tuple into a string containing a valid Erlang tuple. """
+        return "{" + ",".join(map(str, tpl)) + "}"
     
 def exists(env):
     return env.Detect(["erlc"])
