@@ -18,7 +18,27 @@ def generate(env):
     env["ERLC"] = env.Detect("erlc") or "erlc"
     env["ERL"] = env.Detect("erl") or "erl"
     
-    bugReport = "Please report it to Pupeno <pupeno@pupeno.com> (http://pupeno.com)."
+    # The following might be useful, but it is actually needed before the environment is built, so, it is useless.
+    # Find the Erlang root.
+    #command = "erl -noshell -s erlangscanner erlang_dir -s init stop"
+    #sp = subprocess.Popen(command,
+    #                      shell = True,
+    #                      stdin = None,
+    #                      stdout = subprocess.PIPE,
+    #                      stderr = subprocess.PIPE)
+    #sp.wait()
+    #if sp.returncode != 0:
+    #    print("Warning: Failed to find Erlang's root directory, falling back to a default.")
+    #    print("If you have a correct Erlang installation (and it seems likely if you reached this point) and you are not compiling SCons Erlang itself righ now, this is likely to be a bug. %s" % bugReport)
+    #    print("Command: %s." % command)
+    #    print("Return code: %s." % sp.returncode)
+    #    print("Output: \n%s\n" % sp.stdout.read().strip())
+    #    print("Error: \n%s\n" % sp.stderr.read().strip())
+    #    env["ERLROOTDIR"] = "/usr/local/lib/erlang"
+    #else:
+    #    env["ERLROOTDIR"] = sp.stdout.read()
+    #
+    #env["ERLLIBDIR"] = "$ERLROOTDIR/lib"
     
     ##################################################
     ##### Erlang Builder methods and definitions #####

@@ -12,7 +12,7 @@
 %% @copyright 2006 José Pablo Ezequiel "Pupeno" Fernández Silva
 
 -module(erlangscanner).
--export([app_needed_by_rel/1, mod_needed_by_app/1]).
+-export([app_needed_by_rel/1, mod_needed_by_app/1, erlang_dir/0]).
 
 app_needed_by_rel([File]) ->
     {ok, {_,_,_,Applications}} = file:script(File),
@@ -39,7 +39,11 @@ module_names([_|MetaData]) ->
     module_names(MetaData).
 
 
-    
+
+erlang_dir() ->
+    io:fwrite("~s~n", [code:root_dir()]).
+
+
 print_list([]) ->
     ok;
 print_list([Name|Modules]) ->
