@@ -252,7 +252,7 @@ def generate(env):
     #######################################################
     ##### Erlang EDoc builder methods and definitions #####
     
-    def edocGenerator(source, target, env, for_signature):
+    def edocFilesGenerator(source, target, env, for_signature):
         """ Generate the command line to generate the code. """
         
         options = []
@@ -295,10 +295,10 @@ def generate(env):
         else:
             return []
     
-    edocBuilder = Builder(generator = edocGenerator,
-                          emitter = documentTargets,
-                          target_scanner = Scanner(function=edocScanner))
-    env.Append(BUILDERS = {"EDoc" : edocBuilder})
+    edocFilesBuilder = Builder(generator = edocFilesGenerator,
+                               emitter = documentTargets,
+                               target_scanner = Scanner(function=edocScanner))
+    env.Append(BUILDERS = {"EDocFiles" : edocFilesBuilder})
 
     ##########################
     ##### Helper Methods #####
