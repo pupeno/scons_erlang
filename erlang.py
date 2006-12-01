@@ -14,6 +14,7 @@ import os
 import subprocess
 
 def generate(env):
+    bugReport = "Please report it to Pupeno <pupeno@pupeno.com> (http://pupeno.com/software/scons-erlang)."
     env["ERLC"] = env.Detect("erlc") or "erlc"
     env["ERL"] = env.Detect("erl") or "erl"
     
