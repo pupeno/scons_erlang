@@ -261,7 +261,7 @@ def generate(env):
             options.append(("dir", strInStr(env["DIR"])))
         else:
             # Automatic generation of dir based on the target.
-            options.append(("dir", strInStr(os.path.dirname(str(target[0])) + "/")))
+            options.append(("dir", strInStr("doc/")))
 
         if env.has_key("DEF"):
             defs =  map(lambda (key, value): pyTupleToErlTulpe((key, strInStr(value))), env["DEF"])
@@ -275,18 +275,22 @@ def generate(env):
     
     def documentTargets(target, source, env):
         """ Artifitially create all targets that generating documentation will generate to clean them up latter. """
-        tdir = os.path.dirname(str(target[0])) + "/"
+
+        # Find the output dir.
+        if env.has_key("DIR"):
+            dir = env["DIR"]
+        else:
+            dir = "doc/"
         
-        newTargets = [str(target[0])]
         # TODO: What happens if two different sources has the same name on different directories ?
-        newTargets += [tdir + os.path.splitext(os.path.basename(filename))[0] + ".html"
-                       for filename in map(str, source)]
+        target = [dir + os.path.splitext(os.path.basename(filename))[0] + ".html"
+                  for filename in map(str, source)]
         
-        newTargets += [tdir + filename for filename in
-                       ["edoc-info", "modules-frame.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
+        target += [dir + filename for filename in
+                   ["edoc-info", "index.html", "modules-frame.html", "overview-summary.html", "stylesheet.css", "packages-frame.html"]]
         
         #newSources = source + [tdir + "overview.edoc"]
-        return (newTargets, source)
+        return (target, source)
     
     def edocScanner(node, env, path):
         overview = os.path.dirname(str(node)) + "/overview.edoc"
