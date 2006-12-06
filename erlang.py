@@ -15,8 +15,10 @@ import subprocess
 
 def generate(env):
     bugReport = "Please report it to Pupeno <pupeno@pupeno.com> (http://pupeno.com/software/scons-erlang)."
-    env["ERLC"] = env.Detect("erlc") or "erlc"
-    env["ERL"] = env.Detect("erl") or "erl"
+    env["ERLC"] = env.Detect("erlc")
+    env["ERL"] = env.Detect("erl")
+    env["RUN_ERL"] = env.Detect("run_erl")
+    env["ERL_CALL"] = env.Detect("erl_call")
     
     # The following might be useful, but it is actually needed before the environment is built, so, it is useless.
     # Find the Erlang root.
