@@ -11,8 +11,9 @@ import os
 # Configuration.
 options = Options("options.cache")
 options.AddOptions(
-    PathOption("SCONSPREFIX", "SCons prefix directory (where SCons is installed)", os.environ.get('PYTHON_ROOT',"/usr/local/lib/scons/")),
-    PathOption("ERLANGPREFIX", "Erlang prefix directory (where Erlang is installed)", "/usr/local/lib/erlang"))
+    PathOption("PREFIX", "Base prefix", "/usr/local"),
+    PathOption("SCONSPREFIX", "SCons prefix directory (where SCons is installed)", os.environ.get('PYTHON_ROOT',"$PREFIX/lib/scons/")),
+    PathOption("ERLANGPREFIX", "Erlang prefix directory (where Erlang is installed)", "$PREFIX/lib/erlang"))
 
 # Create an environment.
 env = Environment(tools = ["default", "erlang"], toolpath = ["./"], options=options)
