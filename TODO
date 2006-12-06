@@ -1,3 +1,4 @@
 - Write a scanner for .erl files.
+- Rename the erlangscanner to sconserlang or something more neutral, today it is more than a scanner.
 - Documentation.
 
