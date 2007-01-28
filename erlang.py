@@ -306,6 +306,9 @@ def generate(env):
                                target_scanner = Scanner(function=edocScanner))
     env.Append(BUILDERS = {"EDocFiles" : edocFilesBuilder})
 
+    ################################################
+    ##### EUnit runner methods and definitions #####
+
     ##########################
     ##### Helper Methods #####
     
