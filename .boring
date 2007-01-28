@@ -30,8 +30,8 @@
 \#
 \.cvsignore$
 (^|/)Thumbs\.db$
-\.pyc
-\.SConsErlang.conf
-\.directory
-\.sconsign
-\.beam
+\.pyc$
+\.directory$
+\.beam$
+(^|/)options.cache$
+(^|/)\.sconsign.dblite$
